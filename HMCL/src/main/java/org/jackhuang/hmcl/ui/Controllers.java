@@ -312,15 +312,15 @@ public final class Controllers {
         }
 
         if (JavaRuntime.CURRENT_VERSION < 10) {
-            Number shownTipVersion = null;
+            Integer shownTipVersion = null;
 
             try {
-                shownTipVersion = (Number) config().getShownTips().get(JAVA_VERSION_TIP);
+                shownTipVersion = (Integer) config().getShownTips().get(JAVA_VERSION_TIP);
             } catch (ClassCastException e) {
                 LOG.warning("Invalid type for shown tips key: " + JAVA_VERSION_TIP, e);
             }
 
-            if (shownTipVersion == null || shownTipVersion.intValue() < 11) {
+            if (shownTipVersion == null || shownTipVersion < 11) {
                 String downloadLink = null;
 
                 if (OperatingSystem.CURRENT_OS == OperatingSystem.LINUX && Architecture.SYSTEM_ARCH == Architecture.LOONGARCH64_OW)
@@ -457,7 +457,6 @@ public final class Controllers {
         if (href.startsWith("hmcl://")) {
             switch (href) {
                 case "hmcl://settings/feedback":
-                    Controllers.getSettingsPage().showFeedback();
                     Controllers.navigate(Controllers.getSettingsPage());
                     break;
             }

@@ -39,25 +39,13 @@ public class LauncherSettingsPage extends DecoratorAnimatedPage implements Decor
     private final TabHeader tab;
     private final TabHeader.Tab<VersionSettingsPage> gameTab = new TabHeader.Tab<>("versionSettingsPage");
     private final TabControl.Tab<JavaManagementPage> javaManagementTab = new TabControl.Tab<>("javaManagementPage");
-    private final TabHeader.Tab<SettingsPage> settingsTab = new TabHeader.Tab<>("settingsPage");
-    private final TabHeader.Tab<PersonalizationPage> personalizationTab = new TabHeader.Tab<>("personalizationPage");
-    private final TabHeader.Tab<DownloadSettingsPage> downloadTab = new TabHeader.Tab<>("downloadSettingsPage");
-    private final TabHeader.Tab<HelpPage> helpTab = new TabHeader.Tab<>("helpPage");
-    private final TabHeader.Tab<AboutPage> aboutTab = new TabHeader.Tab<>("aboutPage");
-    private final TabHeader.Tab<FeedbackPage> feedbackTab = new TabHeader.Tab<>("feedbackPage");
     private final TransitionPane transitionPane = new TransitionPane();
 
     public LauncherSettingsPage() {
         gameTab.setNodeSupplier(() -> new VersionSettingsPage(true));
         javaManagementTab.setNodeSupplier(JavaManagementPage::new);
-        settingsTab.setNodeSupplier(SettingsPage::new);
-        personalizationTab.setNodeSupplier(PersonalizationPage::new);
-        downloadTab.setNodeSupplier(DownloadSettingsPage::new);
-        helpTab.setNodeSupplier(HelpPage::new);
-        feedbackTab.setNodeSupplier(FeedbackPage::new);
-        aboutTab.setNodeSupplier(AboutPage::new);
-        tab = new TabHeader(gameTab, javaManagementTab, settingsTab, personalizationTab, downloadTab, helpTab, feedbackTab, aboutTab);
-
+        tab = new TabHeader(gameTab, javaManagementTab);
+        
         tab.select(gameTab);
         addEventHandler(Navigator.NavigationEvent.NAVIGATED, event -> gameTab.getNode().loadVersion(Profiles.getSelectedProfile(), null));
         transitionPane.setContent(gameTab.getNode(), ContainerAnimations.NONE);
@@ -66,16 +54,8 @@ public class LauncherSettingsPage extends DecoratorAnimatedPage implements Decor
         });
 
         AdvancedListBox sideBar = new AdvancedListBox()
-                .addNavigationDrawerTab(tab, gameTab, i18n("settings.type.global.manage"), SVG.STADIA_CONTROLLER)
-                .addNavigationDrawerTab(tab, javaManagementTab, i18n("java.management"), SVG.LOCAL_CAFE)
-                .startCategory(i18n("launcher").toUpperCase(Locale.ROOT))
-                .addNavigationDrawerTab(tab, settingsTab, i18n("settings.launcher.general"), SVG.TUNE)
-                .addNavigationDrawerTab(tab, personalizationTab, i18n("settings.launcher.appearance"), SVG.STYLE)
-                .addNavigationDrawerTab(tab, downloadTab, i18n("download"), SVG.DOWNLOAD)
-                .startCategory(i18n("help").toUpperCase(Locale.ROOT))
-                .addNavigationDrawerTab(tab, helpTab, i18n("help"), SVG.HELP)
-                .addNavigationDrawerTab(tab, feedbackTab, i18n("feedback"), SVG.FEEDBACK)
-                .addNavigationDrawerTab(tab, aboutTab, i18n("about"), SVG.INFO);
+            .addNavigationDrawerTab(tab, gameTab, i18n("settings.type.global.manage"), SVG.STADIA_CONTROLLER)
+            .addNavigationDrawerTab(tab, javaManagementTab, i18n("java.management"), SVG.LOCAL_CAFE);
         FXUtils.setLimitWidth(sideBar, 200);
         setLeft(sideBar);
 
@@ -95,10 +75,6 @@ public class LauncherSettingsPage extends DecoratorAnimatedPage implements Decor
     public void showGameSettings(Profile profile) {
         gameTab.getNode().loadVersion(profile, null);
         tab.select(gameTab);
-    }
-
-    public void showFeedback() {
-        tab.select(feedbackTab);
     }
 
     @Override

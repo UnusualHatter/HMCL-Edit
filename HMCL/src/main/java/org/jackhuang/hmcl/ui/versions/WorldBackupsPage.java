@@ -18,6 +18,9 @@
 package org.jackhuang.hmcl.ui.versions;
 
 import com.jfoenix.controls.JFXButton;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -38,6 +41,7 @@ import org.jackhuang.hmcl.ui.*;
 import org.jackhuang.hmcl.ui.construct.MessageDialogPane;
 import org.jackhuang.hmcl.ui.construct.RipplerContainer;
 import org.jackhuang.hmcl.ui.construct.TwoLineListItem;
+import org.jackhuang.hmcl.ui.decorator.DecoratorPage;
 import org.jackhuang.hmcl.util.Pair;
 import org.jackhuang.hmcl.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -61,24 +65,33 @@ import static org.jackhuang.hmcl.util.logging.Logger.LOG;
 /**
  * @author Glavo
  */
-public final class WorldBackupsPage extends ListPageBase<WorldBackupsPage.BackupInfo> {
+public final class WorldBackupsPage extends ListPageBase<WorldBackupsPage.BackupInfo> implements DecoratorPage {
     static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 
     private final World world;
     private final Path backupsDir;
-    private final boolean isReadOnly;
     private final Pattern backupFileNamePattern;
+    private final ObjectProperty<State> state = new SimpleObjectProperty<>();
 
-    public WorldBackupsPage(WorldManagePage worldManagePage) {
-        this.world = worldManagePage.getWorld();
-        this.backupsDir = worldManagePage.getBackupsDir();
-        this.isReadOnly = worldManagePage.isReadOnly();
+    public WorldBackupsPage(World world, Path backupsDir) {
+        this.backupsDir = backupsDir;
+        this.world = world;
         this.backupFileNamePattern = Pattern.compile("(?<datetime>[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}-[0-9]{2}-[0-9]{2})_" + Pattern.quote(world.getFileName()) + "( (?<count>[0-9]+))?\\.zip");
-
-        refresh();
+        this.state.set(State.fromTitle(i18n("world.backup.title", world.getWorldName())));
+        loadBackups();
     }
 
+    @Override
+    public ReadOnlyObjectProperty<State> stateProperty() {
+        return state;
+    }
+
+    @Override
     public void refresh() {
+        loadBackups();
+    }
+
+    private void loadBackups() {
         setLoading(true);
         Task.supplyAsync(() -> {
             if (Files.isDirectory(backupsDir)) {
@@ -127,7 +140,7 @@ public final class WorldBackupsPage extends ListPageBase<WorldBackupsPage.Backup
     }
 
     void createBackup() {
-        Controllers.taskDialog(new WorldBackupTask(world, backupsDir, false).setName(i18n("world.backup.processing")).thenApplyAsync(path -> {
+        Controllers.taskDialog(new WorldBackupTask(world, backupsDir).setName(i18n("world.backup.processing")).thenApplyAsync(path -> {
             Matcher matcher = backupFileNamePattern.matcher(path.getFileName().toString());
             if (!matcher.matches()) {
                 throw new AssertionError("Wrong backup file name" + path);
@@ -163,13 +176,7 @@ public final class WorldBackupsPage extends ListPageBase<WorldBackupsPage.Backup
 
         @Override
         protected List<Node> initializeToolbar(WorldBackupsPage skinnable) {
-            JFXButton createBackup = createToolbarButton2(i18n("world.backup.create.new_one"), SVG.ARCHIVE, skinnable::createBackup);
-            createBackup.setDisable(isReadOnly);
-
-            return Arrays.asList(
-                    createToolbarButton2(i18n("button.refresh"), SVG.REFRESH, skinnable::refresh),
-                    createBackup
-            );
+            return Arrays.asList(createToolbarButton2(i18n("button.refresh"), SVG.REFRESH, skinnable::refresh), createToolbarButton2(i18n("world.backup.create.new_one"), SVG.ARCHIVE, skinnable::createBackup));
         }
     }
 

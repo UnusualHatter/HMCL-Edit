@@ -1280,7 +1280,7 @@
 }
 
 .jfx-decorator-drawer {
-    -fx-background-color: rgba(244, 244, 244, 0.5);
+    -fx-background-color: rgba(255, 255, 255, 0.733);
 }
 
 .jfx-decorator-title {
@@ -1313,11 +1313,11 @@
 }
 
 .content-background {
-    -fx-background-color: rgba(244, 244, 244, 0.5);
+    -fx-background-color: rgba(255, 255, 255, 0.733);
 }
 
 .gray-background {
-    -fx-background-color: rgba(244, 244, 244, 0.5);
+    -fx-background-color: rgba(255, 255, 255, 0.733);
 }
 
 .white-background {

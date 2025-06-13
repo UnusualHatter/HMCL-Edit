@@ -428,7 +428,7 @@ public final class VersionSetting implements Cloneable, Observable {
         notPatchNativesProperty.set(notPatchNatives);
     }
 
-    private final BooleanProperty showLogsProperty = new SimpleBooleanProperty(this, "showLogs", false);
+    private final BooleanProperty showLogsProperty = new SimpleBooleanProperty(this, "showLogs", true);
 
     public BooleanProperty showLogsProperty() {
         return showLogsProperty;
@@ -547,21 +547,21 @@ public final class VersionSetting implements Cloneable, Observable {
     /**
      * Your custom gameDir
      */
-    private final StringProperty gameDirProperty = new SimpleStringProperty(this, "gameDir", "");
+    private final StringProperty gameDirProperty = new SimpleStringProperty(this, "gameDir", "modpack");
 
     public StringProperty gameDirProperty() {
         return gameDirProperty;
     }
 
     public String getGameDir() {
-        return gameDirProperty.get();
+        return "modpack";
     }
 
     public void setGameDir(String gameDir) {
-        gameDirProperty.set(gameDir);
+    gameDirProperty.set("modpack");
     }
 
-    private final ObjectProperty<ProcessPriority> processPriorityProperty = new SimpleObjectProperty<>(this, "processPriority", ProcessPriority.NORMAL);
+    private final ObjectProperty<ProcessPriority> processPriorityProperty = new SimpleObjectProperty<>(this, "processPriority", ProcessPriority.HIGH);
 
     public ObjectProperty<ProcessPriority> processPriorityProperty() {
         return processPriorityProperty;
@@ -638,7 +638,7 @@ public final class VersionSetting implements Cloneable, Observable {
      * 1 - Hide the launcher when the game starts.<br/>
      * 2 - Keep the launcher open.<br/>
      */
-    private final ObjectProperty<LauncherVisibility> launcherVisibilityProperty = new SimpleObjectProperty<>(this, "launcherVisibility", LauncherVisibility.HIDE);
+    private final ObjectProperty<LauncherVisibility> launcherVisibilityProperty = new SimpleObjectProperty<>(this, "launcherVisibility", LauncherVisibility.HIDE_AND_REOPEN);
 
     public ObjectProperty<LauncherVisibility> launcherVisibilityProperty() {
         return launcherVisibilityProperty;
@@ -838,8 +838,8 @@ public final class VersionSetting implements Cloneable, Observable {
             vs.setNotCheckGame(Optional.ofNullable(obj.get("notCheckGame")).map(JsonElement::getAsBoolean).orElse(false));
             vs.setNotCheckJVM(Optional.ofNullable(obj.get("notCheckJVM")).map(JsonElement::getAsBoolean).orElse(false));
             vs.setNotPatchNatives(Optional.ofNullable(obj.get("notPatchNatives")).map(JsonElement::getAsBoolean).orElse(false));
-            vs.setShowLogs(Optional.ofNullable(obj.get("showLogs")).map(JsonElement::getAsBoolean).orElse(false));
-            vs.setLauncherVisibility(getOrDefault(LauncherVisibility.values(), obj.get("launcherVisibility"), LauncherVisibility.HIDE));
+            vs.setShowLogs(Optional.ofNullable(obj.get("showLogs")).map(JsonElement::getAsBoolean).orElse(true));
+            vs.setLauncherVisibility(getOrDefault(LauncherVisibility.values(), obj.get("launcherVisibility"), LauncherVisibility.HIDE_AND_REOPEN));
             vs.setProcessPriority(getOrDefault(ProcessPriority.values(), obj.get("processPriority"), ProcessPriority.NORMAL));
             vs.setUseNativeGLFW(Optional.ofNullable(obj.get("useNativeGLFW")).map(JsonElement::getAsBoolean).orElse(false));
             vs.setUseNativeOpenAL(Optional.ofNullable(obj.get("useNativeOpenAL")).map(JsonElement::getAsBoolean).orElse(false));

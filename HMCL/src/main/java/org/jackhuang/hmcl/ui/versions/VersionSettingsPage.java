@@ -109,9 +109,6 @@ public final class VersionSettingsPage extends StackPane implements DecoratorPag
     private final MultiFileItem.StringOption<Pair<JavaVersionType, JavaRuntime>> javaVersionOption;
     private final MultiFileItem.FileOption<Pair<JavaVersionType, JavaRuntime>> javaCustomOption;
 
-    private final ComponentSublist gameDirSublist;
-    private final MultiFileItem<GameDirectoryType> gameDirItem;
-    private final MultiFileItem.FileOption<GameDirectoryType> gameDirCustomOption;
     private final JFXComboBox<ProcessPriority> cboProcessPriority;
     private final OptionToggleButton showLogsPane;
     private final ImagePickerItem iconPickerItem;
@@ -159,9 +156,6 @@ public final class VersionSettingsPage extends StackPane implements DecoratorPag
 
             rootPane.getChildren().addAll(specificSettingsHint);
         } else {
-            HintPane gameDirHint = new HintPane(MessageDialogPane.MessageType.INFO);
-            gameDirHint.setText(i18n("settings.game.working_directory.hint"));
-            rootPane.getChildren().add(gameDirHint);
 
             ComponentList iconPickerItemWrapper = new ComponentList();
             rootPane.getChildren().add(iconPickerItemWrapper);
@@ -255,22 +249,6 @@ public final class VersionSettingsPage extends StackPane implements DecoratorPag
                 javaItem.loadChildren(options);
                 initializeSelectedJava();
             });
-
-            gameDirItem = new MultiFileItem<>();
-            gameDirSublist = new ComponentSublist();
-            gameDirSublist.getContent().add(gameDirItem);
-            gameDirSublist.setTitle(i18n("settings.game.working_directory"));
-            gameDirSublist.setHasSubtitle(versionId != null);
-            gameDirItem.disableProperty().bind(modpack);
-            gameDirCustomOption = new MultiFileItem.FileOption<>(i18n("settings.custom"), GameDirectoryType.CUSTOM)
-                    .setChooserTitle(i18n("settings.game.working_directory.choose"))
-                    .setDirectory(true);
-
-            gameDirItem.loadChildren(Arrays.asList(
-                    new MultiFileItem.Option<>(i18n("settings.advanced.game_dir.default"), GameDirectoryType.ROOT_FOLDER),
-                    new MultiFileItem.Option<>(i18n("settings.advanced.game_dir.independent"), GameDirectoryType.VERSION_FOLDER),
-                    gameDirCustomOption
-            ));
 
             VBox maxMemoryPane = new VBox(8);
             {
@@ -488,7 +466,6 @@ public final class VersionSettingsPage extends StackPane implements DecoratorPag
 
             componentList.getContent().addAll(
                     javaSublist,
-                    gameDirSublist,
                     maxMemoryPane,
                     launcherVisibilityPane,
                     dimensionPane,
@@ -566,7 +543,6 @@ public final class VersionSettingsPage extends StackPane implements DecoratorPag
             FXUtils.unbind(txtHeight, lastVersionSetting.heightProperty());
             maxMemory.unbindBidirectional(lastVersionSetting.maxMemoryProperty());
             javaCustomOption.valueProperty().unbindBidirectional(lastVersionSetting.javaDirProperty());
-            gameDirCustomOption.valueProperty().unbindBidirectional(lastVersionSetting.gameDirProperty());
             FXUtils.unbind(txtServerIP, lastVersionSetting.serverIpProperty());
             chkAutoAllocate.selectedProperty().unbindBidirectional(lastVersionSetting.autoMemoryProperty());
             chkFullscreen.selectedProperty().unbindBidirectional(lastVersionSetting.fullscreenProperty());
@@ -579,9 +555,6 @@ public final class VersionSettingsPage extends StackPane implements DecoratorPag
             lastVersionSetting.javaDirProperty().removeListener(javaListener);
             lastVersionSetting.defaultJavaPathPropertyProperty().removeListener(javaListener);
             lastVersionSetting.javaVersionProperty().removeListener(javaListener);
-
-            gameDirItem.selectedDataProperty().unbindBidirectional(lastVersionSetting.gameDirTypeProperty());
-            gameDirSublist.subtitleProperty().unbind();
 
             enableSpecificSettings.removeListener(specificSettingsListener);
 
@@ -601,7 +574,6 @@ public final class VersionSettingsPage extends StackPane implements DecoratorPag
         maxMemory.bindBidirectional(versionSetting.maxMemoryProperty());
 
         javaCustomOption.bindBidirectional(versionSetting.javaDirProperty());
-        gameDirCustomOption.bindBidirectional(versionSetting.gameDirProperty());
         FXUtils.bindString(txtServerIP, versionSetting.serverIpProperty());
         chkAutoAllocate.selectedProperty().bindBidirectional(versionSetting.autoMemoryProperty());
         chkFullscreen.selectedProperty().bindBidirectional(versionSetting.fullscreenProperty());
@@ -651,10 +623,6 @@ public final class VersionSettingsPage extends StackPane implements DecoratorPag
         versionSetting.javaDirProperty().addListener(javaListener);
         versionSetting.defaultJavaPathPropertyProperty().addListener(javaListener);
         versionSetting.javaVersionProperty().addListener(javaListener);
-
-        gameDirItem.selectedDataProperty().bindBidirectional(versionSetting.gameDirTypeProperty());
-        gameDirSublist.subtitleProperty().bind(Bindings.createStringBinding(() -> Paths.get(profile.getRepository().getRunDirectory(versionId).getAbsolutePath()).normalize().toString(),
-                versionSetting.gameDirProperty(), versionSetting.gameDirTypeProperty()));
 
         lastVersionSetting = versionSetting;
 

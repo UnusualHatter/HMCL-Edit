@@ -37,13 +37,10 @@ import org.jackhuang.hmcl.setting.Profile;
 import org.jackhuang.hmcl.setting.Profiles;
 import org.jackhuang.hmcl.ui.FXUtils;
 import org.jackhuang.hmcl.ui.construct.ComponentList;
-import org.jackhuang.hmcl.ui.construct.FileItem;
-import org.jackhuang.hmcl.ui.construct.OptionToggleButton;
 import org.jackhuang.hmcl.ui.construct.PageCloseEvent;
 import org.jackhuang.hmcl.ui.decorator.DecoratorPage;
 import org.jackhuang.hmcl.util.StringUtils;
 
-import java.io.File;
 import java.util.Optional;
 
 import static org.jackhuang.hmcl.util.i18n.I18n.i18n;
@@ -54,8 +51,6 @@ public final class ProfilePage extends BorderPane implements DecoratorPage {
     private final Profile profile;
 
     private final JFXTextField txtProfileName;
-    private final FileItem gameDir;
-    private final OptionToggleButton toggleUseRelativePath;
 
     /**
      * @param profile null if creating a new profile.
@@ -65,8 +60,8 @@ public final class ProfilePage extends BorderPane implements DecoratorPage {
         String profileDisplayName = Optional.ofNullable(profile).map(Profiles::getProfileDisplayName).orElse("");
 
         state.set(State.fromTitle(profile == null ? i18n("profile.new") : i18n("profile") + " - " + profileDisplayName));
-        location = new SimpleStringProperty(this, "location",
-                Optional.ofNullable(profile).map(Profile::getGameDir).map(File::getAbsolutePath).orElse(".minecraft"));
+        // Always use "modpack" as the working directory
+        location = new SimpleStringProperty(this, "location", "modpack");
 
         ScrollPane scroll = new ScrollPane();
         this.setCenter(scroll);
@@ -106,20 +101,11 @@ public final class ProfilePage extends BorderPane implements DecoratorPage {
                         });
                     }
 
-                    gameDir = new FileItem();
-                    gameDir.setName(i18n("profile.instance_directory"));
-                    gameDir.setTitle(i18n("profile.instance_directory.choose"));
-                    gameDir.pathProperty().bindBidirectional(location);
+                    // Show a fixed, non-editable label for the working directory
+                    Label workingDirLabel = new Label("Working Directory: modpack (fixed)");
+                    workingDirLabel.setPadding(new Insets(8, 0, 8, 0));
 
-                    toggleUseRelativePath = new OptionToggleButton();
-                    toggleUseRelativePath.setTitle(i18n("profile.use_relative_path"));
-
-                    gameDir.convertToRelativePathProperty().bind(toggleUseRelativePath.selectedProperty());
-                    if (profile != null) {
-                        toggleUseRelativePath.setSelected(profile.isUseRelativePath());
-                    }
-
-                    componentList.getContent().setAll(profileNamePane, gameDir, toggleUseRelativePath);
+                    componentList.getContent().setAll(profileNamePane, workingDirLabel);
                 }
 
                 rootPane.getChildren().setAll(componentList);
@@ -149,16 +135,12 @@ public final class ProfilePage extends BorderPane implements DecoratorPage {
     private void onSave() {
         if (profile != null) {
             profile.setName(txtProfileName.getText());
-            profile.setUseRelativePath(toggleUseRelativePath.isSelected());
-            if (StringUtils.isNotBlank(getLocation())) {
-                profile.setGameDir(new File(getLocation()));
-            }
+            // Always use "modpack" as the working directory
+            profile.setGameDir(new java.io.File("modpack"));
+            profile.setUseRelativePath(false);
         } else {
-            if (StringUtils.isBlank(getLocation())) {
-                gameDir.onExplore();
-            }
-            Profile newProfile = new Profile(txtProfileName.getText(), new File(getLocation()));
-            newProfile.setUseRelativePath(toggleUseRelativePath.isSelected());
+            Profile newProfile = new Profile(txtProfileName.getText(), new java.io.File("modpack"));
+            newProfile.setUseRelativePath(false);
             Profiles.getProfiles().add(newProfile);
         }
 
@@ -179,6 +161,7 @@ public final class ProfilePage extends BorderPane implements DecoratorPage {
     }
 
     public void setLocation(String location) {
-        this.location.set(location);
+        // Ignore external changes, always use "modpack"
+        this.location.set("modpack");
     }
 }

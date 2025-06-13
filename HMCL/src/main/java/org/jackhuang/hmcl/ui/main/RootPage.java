@@ -161,27 +161,12 @@ public class RootPage extends DecoratorAnimatedPage implements DecoratorPage {
             gameItem.setTitle(i18n("version.manage"));
             gameItem.setOnAction(e -> Controllers.navigate(Controllers.getGameListPage()));
 
-            // forth item in left sidebar
-            AdvancedListItem downloadItem = new AdvancedListItem();
-            downloadItem.setLeftGraphic(wrap(SVG.DOWNLOAD));
-            downloadItem.setActionButtonVisible(false);
-            downloadItem.setTitle(i18n("download"));
-            downloadItem.setOnAction(e -> Controllers.navigate(Controllers.getDownloadPage()));
-            FXUtils.installFastTooltip(downloadItem, i18n("download.hint"));
-
             // fifth item in left sidebar
             AdvancedListItem launcherSettingsItem = new AdvancedListItem();
             launcherSettingsItem.setLeftGraphic(wrap(SVG.SETTINGS));
             launcherSettingsItem.setActionButtonVisible(false);
             launcherSettingsItem.setTitle(i18n("settings"));
             launcherSettingsItem.setOnAction(e -> Controllers.navigate(Controllers.getSettingsPage()));
-
-            // sixth item in left sidebar
-            AdvancedListItem chatItem = new AdvancedListItem();
-            chatItem.setLeftGraphic(wrap(SVG.CHAT));
-            chatItem.setActionButtonVisible(false);
-            chatItem.setTitle(i18n("chat"));
-            chatItem.setOnAction(e -> FXUtils.openLink(Metadata.GROUPS_URL));
 
             // the left sidebar
             AdvancedListBox sideBar = new AdvancedListBox()
@@ -190,10 +175,8 @@ public class RootPage extends DecoratorAnimatedPage implements DecoratorPage {
                     .startCategory(i18n("version").toUpperCase(Locale.ROOT))
                     .add(gameListItem)
                     .add(gameItem)
-                    .add(downloadItem)
                     .startCategory(i18n("settings.launcher.general").toUpperCase(Locale.ROOT))
                     .add(launcherSettingsItem)
-                    .add(chatItem)
                     ;
 
             // the root page, with the sidebar in left, navigator in center.

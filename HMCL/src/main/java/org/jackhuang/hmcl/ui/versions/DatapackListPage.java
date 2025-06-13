@@ -17,6 +17,8 @@
  */
 package org.jackhuang.hmcl.ui.versions;
 
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Skin;
 import javafx.stage.FileChooser;
@@ -26,6 +28,7 @@ import org.jackhuang.hmcl.task.Task;
 import org.jackhuang.hmcl.ui.Controllers;
 import org.jackhuang.hmcl.ui.FXUtils;
 import org.jackhuang.hmcl.ui.ListPageBase;
+import org.jackhuang.hmcl.ui.decorator.DecoratorPage;
 import org.jackhuang.hmcl.util.io.FileUtils;
 import org.jackhuang.hmcl.util.javafx.MappedObservableList;
 
@@ -38,17 +41,24 @@ import java.util.Objects;
 import static org.jackhuang.hmcl.util.logging.Logger.LOG;
 import static org.jackhuang.hmcl.util.i18n.I18n.i18n;
 
-public final class DatapackListPage extends ListPageBase<DatapackListPageSkin.DatapackInfoObject> {
+public class DatapackListPage extends ListPageBase<DatapackListPageSkin.DatapackInfoObject> implements DecoratorPage {
+    private final ReadOnlyObjectWrapper<State> state = new ReadOnlyObjectWrapper<>();
     private final Path worldDir;
     private final Datapack datapack;
 
-    public DatapackListPage(WorldManagePage worldManagePage) {
-        this.worldDir = worldManagePage.getWorld().getFile();
+    // Strongly referencing items, preventing GC collection
+    @SuppressWarnings("FieldCanBeLocal")
+    private final ObservableList<DatapackListPageSkin.DatapackInfoObject> items;
+
+    public DatapackListPage(String worldName, Path worldDir) {
+        this.worldDir = worldDir;
+
+        state.set(State.fromTitle(i18n("datapack.title", worldName)));
 
         datapack = new Datapack(worldDir.resolve("datapacks"));
         datapack.loadFromDir();
 
-        setItems(MappedObservableList.create(datapack.getInfo(), DatapackListPageSkin.DatapackInfoObject::new));
+        setItems(items = MappedObservableList.create(datapack.getInfo(), DatapackListPageSkin.DatapackInfoObject::new));
 
         FXUtils.applyDragListener(this, it -> Objects.equals("zip", FileUtils.getExtension(it)),
                 mods -> mods.forEach(this::installSingleDatapack), this::refresh);
@@ -79,6 +89,11 @@ public final class DatapackListPage extends ListPageBase<DatapackListPageSkin.Da
                     System.gc();
                 })
                 .start();
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<State> stateProperty() {
+        return state.getReadOnlyProperty();
     }
 
     public void add() {
